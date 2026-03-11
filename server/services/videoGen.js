@@ -1,20 +1,45 @@
-const TWELVE_LABS_BASE = "https://api.twelvelabs.io/v1.3";
+import { BedrockRuntimeClient, StartAsyncInvokeCommand, GetAsyncInvokeCommand } from "@aws-sdk/client-bedrock-runtime";
 
-export async function generateVideo(prompt) {
-  const apiKey = process.env.TWELVE_LABS_API_KEY;
-  if (!apiKey) return null;
+const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
 
-  const res = await fetch(`${TWELVE_LABS_BASE}/generate`, {
-    method: "POST",
-    headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({ text: `Cinematic micro drama scene: ${prompt}`, duration: 6 }),
-  });
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  if (!res.ok) {
-    console.error("Twelve Labs error:", await res.text());
-    return null;
-  }
+export async function generateVideo(prompt, s3Bucket) {
+ if (!s3Bucket) {
+   console.warn("S3_VIDEO_BUCKET not set, skipping video generation");
+   return null;
+ }
 
-  const data = await res.json();
-  return data.video_url || null;
+ const key = `videos/${Date.now()}.mp4`;
+
+ const command = new StartAsyncInvokeCommand({
+   modelId: "amazon.nova-reel-v1:0",
+   contentType: "application/json",
+   accept: "application/json",
+   modelInput: {
+     taskType: "TEXT_VIDEO",
+     textToVideoParams: { text: `Cinematic micro drama scene: ${prompt}` },
+     videoGenerationConfig: { durationSeconds: 6, fps: 24, dimension: "1280x720" },
+   },
+   outputDataConfig: { s3OutputDataConfig: { s3Uri: `s3://${s3Bucket}/${key}` } },
+ });
+
+ const { invocationArn } = await client.send(command);
+ console.log("Nova Reel invocation started:", invocationArn);
+
+ for (let i = 0; i < 60; i++) {
+   await sleep(10000);
+   const status = await client.send(new GetAsyncInvokeCommand({ invocationArn }));
+   console.log("Nova Reel status:", status.status);
+
+   if (status.status === "Completed") {
+     return `https://${s3Bucket}.s3.amazonaws.com/${key}/output.mp4`;
+   }
+   if (status.status === "Failed") {
+     console.error("Nova Reel failed:", status.failureMessage);
+     return { error: `Video generation failed: ${status.failureMessage}` };
+   }
+ }
+
+ return { error: "Video generation timed out" };
 }
