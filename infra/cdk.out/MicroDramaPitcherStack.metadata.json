@@ -153,6 +153,30 @@
       "data": "ApiPOSTapigenerateD0E1BE21"
     }
   ],
+  "/MicroDramaPitcherStack/Api/POST--api--video--start/LambdaIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiPOSTapivideostartLambdaIntegrationPermissionDCDBDFAE"
+    }
+  ],
+  "/MicroDramaPitcherStack/Api/POST--api--video--start/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiPOSTapivideostartD7321444"
+    }
+  ],
+  "/MicroDramaPitcherStack/Api/POST--api--video--status/LambdaIntegration-Permission": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiPOSTapivideostatusLambdaIntegrationPermissionCC929840"
+    }
+  ],
+  "/MicroDramaPitcherStack/Api/POST--api--video--status/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiPOSTapivideostatus35090E8A"
+    }
+  ],
   "/MicroDramaPitcherStack/SiteBucket/Policy/Resource": [
     {
       "type": "aws:cdk:logicalId",

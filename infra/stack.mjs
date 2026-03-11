@@ -55,6 +55,8 @@ class MicroDramaPitcherStack extends Stack {
    const api = new HttpApi(this, "Api", { corsPreflight: { allowOrigins: ["*"], allowMethods: [HttpMethod.POST, HttpMethod.OPTIONS], allowHeaders: ["Content-Type"] } });
    const integration = new HttpLambdaIntegration("LambdaIntegration", fn);
    api.addRoutes({ path: "/api/generate", methods: [HttpMethod.POST], integration });
+   api.addRoutes({ path: "/api/video/start", methods: [HttpMethod.POST], integration });
+   api.addRoutes({ path: "/api/video/status", methods: [HttpMethod.POST], integration });
 
    const siteBucket = new s3.Bucket(this, "SiteBucket", {
      removalPolicy: RemovalPolicy.DESTROY,

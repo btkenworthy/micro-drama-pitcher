@@ -280,7 +280,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
      },
-     "S3Key": "a6016149435d554fa5bd47c74a6bfe74f33e934c9960de93efb1448200d017c4.zip"
+     "S3Key": "45987377349e5aae0e1e6e19a680f8e76b42d66bc1bdbe28009b5d760c51be65.zip"
     },
     "Environment": {
      "Variables": {
@@ -306,7 +306,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "MicroDramaPitcherStack/GenerateHandler/Resource",
-    "aws:asset:path": "asset.a6016149435d554fa5bd47c74a6bfe74f33e934c9960de93efb1448200d017c4",
+    "aws:asset:path": "asset.45987377349e5aae0e1e6e19a680f8e76b42d66bc1bdbe28009b5d760c51be65",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -423,6 +423,126 @@
    },
    "Metadata": {
     "aws:cdk:path": "MicroDramaPitcherStack/Api/POST--api--generate/Resource"
+   }
+  },
+  "ApiPOSTapivideostartLambdaIntegrationPermissionDCDBDFAE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GenerateHandlerFDEBB1E6",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiF70053CD"
+       },
+       "/*/*/api/video/start"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Api/POST--api--video--start/LambdaIntegration-Permission"
+   }
+  },
+  "ApiPOSTapivideostartD7321444": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiF70053CD"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /api/video/start",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "ApiPOSTapigenerateLambdaIntegrationEBD0AD3D"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Api/POST--api--video--start/Resource"
+   }
+  },
+  "ApiPOSTapivideostatusLambdaIntegrationPermissionCC929840": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GenerateHandlerFDEBB1E6",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiF70053CD"
+       },
+       "/*/*/api/video/status"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Api/POST--api--video--status/LambdaIntegration-Permission"
+   }
+  },
+  "ApiPOSTapivideostatus35090E8A": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiF70053CD"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /api/video/status",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "ApiPOSTapigenerateLambdaIntegrationEBD0AD3D"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Api/POST--api--video--status/Resource"
    }
   },
   "SiteBucket397A1860": {
@@ -726,7 +846,7 @@
      }
     ],
     "SourceObjectKeys": [
-     "49095e0941d6be56e144abdf9513fb005fc9b9683e1609d627cceac923d06743.zip"
+     "f5c2bad14fcc8312611f748077af9cd8f4bc01f19ed093cae2cf807f2920b8f3.zip"
     ],
     "DestinationBucketName": {
      "Ref": "SiteBucket397A1860"

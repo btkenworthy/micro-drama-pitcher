@@ -1,6 +1,5 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-west-2" });
 const s3 = new S3Client({ region: process.env.AWS_REGION || "us-west-2" });
@@ -33,7 +32,7 @@ export async function generateImage(prompt, s3Bucket) {
      Body: Buffer.from(base64, "base64"),
      ContentType: "image/png",
    }));
-   return await getSignedUrl(s3, new GetObjectCommand({ Bucket: s3Bucket, Key: key }), { expiresIn: 3600 });
+   return `https://${s3Bucket}.s3.amazonaws.com/${key}`;
  }
 
  return `data:image/png;base64,${base64}`;

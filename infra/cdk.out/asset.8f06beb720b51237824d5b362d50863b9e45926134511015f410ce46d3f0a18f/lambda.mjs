@@ -21,6 +21,7 @@ export const handler = async (event) => {
    if (path === "/api/generate") {
      const { prompt } = JSON.parse(event.body || "{}");
      if (!prompt) return err("prompt is required", 400);
+
      const bucket = process.env.S3_VIDEO_BUCKET;
      const script = await generateScript(prompt);
      const scenes = script.scenes || [];
@@ -38,9 +39,9 @@ export const handler = async (event) => {
    }
 
    if (path === "/api/video/status") {
-     const { invocationArn, bucket, key } = JSON.parse(event.body || "{}");
+     const { invocationArn } = JSON.parse(event.body || "{}");
      if (!invocationArn) return err("invocationArn is required", 400);
-     const result = await checkVideo(invocationArn, bucket, key);
+     const result = await checkVideo(invocationArn);
      return ok(result);
    }
 
