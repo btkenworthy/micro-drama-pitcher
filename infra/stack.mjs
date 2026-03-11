@@ -17,6 +17,12 @@ class MicroDramaPitcherStack extends Stack {
  constructor(scope, id, props) {
    super(scope, id, props);
 
+   const videoBucket = new s3.Bucket(this, "VideoBucket", {
+     removalPolicy: RemovalPolicy.DESTROY,
+     autoDeleteObjects: true,
+     cors: [{ allowedMethods: [s3.HttpMethods.GET], allowedOrigins: ["*"], allowedHeaders: ["*"] }],
+   });
+
    const fn = new lambda.Function(this, "GenerateHandler", {
      runtime: lambda.Runtime.NODEJS_20_X,
      handler: "lambda.handler",
@@ -33,18 +39,18 @@ class MicroDramaPitcherStack extends Stack {
          },
        },
      }),
-     timeout: Duration.minutes(5),
+     timeout: Duration.minutes(15),
      memorySize: 512,
      environment: {
-       AWS_REGION_OVERRIDE: props?.env?.region || "us-east-1",
-       TWELVE_LABS_API_KEY: process.env.TWELVE_LABS_API_KEY || "",
+       S3_VIDEO_BUCKET: videoBucket.bucketName,
      },
    });
 
    fn.addToRolePolicy(new iam.PolicyStatement({
-     actions: ["bedrock:InvokeModel"],
+     actions: ["bedrock:InvokeModel", "bedrock:StartAsyncInvoke", "bedrock:GetAsyncInvoke"],
      resources: ["*"],
    }));
+   videoBucket.grantReadWrite(fn);
 
    const api = new HttpApi(this, "Api", { corsPreflight: { allowOrigins: ["*"], allowMethods: [HttpMethod.POST, HttpMethod.OPTIONS], allowHeaders: ["Content-Type"] } });
    const integration = new HttpLambdaIntegration("LambdaIntegration", fn);

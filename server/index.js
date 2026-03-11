@@ -33,7 +33,7 @@ app.post("/api/generate", async (req, res) => {
     // 3. Optionally generate video for key scene
     let video = null;
     if (generateVideos && scenes.length > 0) {
-      video = await generateVideo(scenes[0].visualPrompt || scenes[0].description);
+      video = await generateVideo(scenes[0].visualPrompt || scenes[0].description, process.env.S3_VIDEO_BUCKET);
     }
 
     res.json({ script, images, video });
