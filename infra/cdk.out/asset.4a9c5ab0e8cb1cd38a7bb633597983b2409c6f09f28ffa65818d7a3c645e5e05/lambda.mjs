@@ -18,16 +18,15 @@ export const handler = async (event) => {
    const { prompt, generateVideos = false } = JSON.parse(event.body || "{}");
    if (!prompt) return { statusCode: 400, headers, body: JSON.stringify({ error: "prompt is required" }) };
 
-   const bucket = process.env.S3_VIDEO_BUCKET;
    const script = await generateScript(prompt);
    const scenes = script.scenes || [];
    const images = await Promise.all(
-     scenes.map((s) => generateImage(s.visualPrompt || s.description, bucket))
+     scenes.map((s) => generateImage(s.visualPrompt || s.description))
    );
 
    let video = null;
    if (generateVideos && scenes.length > 0) {
-     video = await generateVideo(scenes[0].visualPrompt || scenes[0].description, bucket);
+     video = await generateVideo(scenes[0].visualPrompt || scenes[0].description, process.env.S3_VIDEO_BUCKET);
    }
 
    return { statusCode: 200, headers, body: JSON.stringify({ script, images, video }) };

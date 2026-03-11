@@ -1,23 +1,39 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
+const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-west-2" });
+const s3 = new S3Client({ region: process.env.AWS_REGION || "us-west-2" });
 
-export async function generateImage(prompt) {
-  const payload = {
-    taskType: "TEXT_IMAGE",
-    textToImageParams: { text: `Cinematic still, film scene: ${prompt}` },
-    imageGenerationConfig: { numberOfImages: 1, height: 720, width: 1280, quality: "standard" },
-  };
+export async function generateImage(prompt, s3Bucket) {
+ const payload = {
+   prompt: `Cinematic still, film scene: ${prompt}`,
+   mode: "text-to-image",
+   aspect_ratio: "16:9",
+   output_format: "png",
+ };
 
-  const command = new InvokeModelCommand({
-    modelId: "amazon.nova-canvas-v1:0",
-    contentType: "application/json",
-    accept: "application/json",
-    body: JSON.stringify(payload),
-  });
+ const command = new InvokeModelCommand({
+   modelId: "stability.stable-image-ultra-v1:1",
+   contentType: "application/json",
+   accept: "application/json",
+   body: JSON.stringify(payload),
+ });
 
-  const response = await client.send(command);
-  const body = JSON.parse(new TextDecoder().decode(response.body));
-  const base64 = body.images?.[0];
-  return base64 ? `data:image/png;base64,${base64}` : null;
+ const response = await bedrock.send(command);
+ const body = JSON.parse(new TextDecoder().decode(response.body));
+ const base64 = body.images?.[0];
+ if (!base64) return null;
+
+ if (s3Bucket) {
+   const key = `images/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
+   await s3.send(new PutObjectCommand({
+     Bucket: s3Bucket,
+     Key: key,
+     Body: Buffer.from(base64, "base64"),
+     ContentType: "image/png",
+   }));
+   return `https://${s3Bucket}.s3.amazonaws.com/${key}`;
+ }
+
+ return `data:image/png;base64,${base64}`;
 }

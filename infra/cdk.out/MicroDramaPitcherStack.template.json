@@ -1,5 +1,179 @@
 {
  "Resources": {
+  "VideoBucket6ED8E1AF": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ]
+      }
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/VideoBucket/Resource"
+   }
+  },
+  "VideoBucketPolicyDE50723C": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "VideoBucket6ED8E1AF"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideoBucket6ED8E1AF",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideoBucket6ED8E1AF",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/VideoBucket/Policy/Resource"
+   }
+  },
+  "VideoBucketAutoDeleteObjectsCustomResource5F365B42": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "VideoBucket6ED8E1AF"
+    }
+   },
+   "DependsOn": [
+    "VideoBucketPolicyDE50723C"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/VideoBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "VideoBucket6ED8E1AF"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
   "GenerateHandlerServiceRoleD6000C20": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -40,9 +214,50 @@
     "PolicyDocument": {
      "Statement": [
       {
-       "Action": "bedrock:InvokeModel",
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:StartAsyncInvoke",
+        "bedrock:GetAsyncInvoke"
+       ],
        "Effect": "Allow",
        "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideoBucket6ED8E1AF",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideoBucket6ED8E1AF",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
       }
      ],
      "Version": "2012-10-17"
@@ -65,12 +280,13 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
      },
-     "S3Key": "f84ac2b06be45f1b4f22494f9bca853892aff81fe490bbecb71858c32c440c50.zip"
+     "S3Key": "a6016149435d554fa5bd47c74a6bfe74f33e934c9960de93efb1448200d017c4.zip"
     },
     "Environment": {
      "Variables": {
-      "AWS_REGION_OVERRIDE": "us-west-2",
-      "TWELVE_LABS_API_KEY": ""
+      "S3_VIDEO_BUCKET": {
+       "Ref": "VideoBucket6ED8E1AF"
+      }
      }
     },
     "Handler": "lambda.handler",
@@ -82,7 +298,7 @@
      ]
     },
     "Runtime": "nodejs20.x",
-    "Timeout": 300
+    "Timeout": 900
    },
    "DependsOn": [
     "GenerateHandlerServiceRoleDefaultPolicy1F3D174A",
@@ -90,7 +306,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "MicroDramaPitcherStack/GenerateHandler/Resource",
-    "aws:asset:path": "asset.f84ac2b06be45f1b4f22494f9bca853892aff81fe490bbecb71858c32c440c50",
+    "aws:asset:path": "asset.a6016149435d554fa5bd47c74a6bfe74f33e934c9960de93efb1448200d017c4",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -376,72 +592,6 @@
     "aws:cdk:path": "MicroDramaPitcherStack/SiteBucket/AutoDeleteObjectsCustomResource/Default"
    }
   },
-  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
-   "Type": "AWS::IAM::Role",
-   "Properties": {
-    "AssumeRolePolicyDocument": {
-     "Version": "2012-10-17",
-     "Statement": [
-      {
-       "Action": "sts:AssumeRole",
-       "Effect": "Allow",
-       "Principal": {
-        "Service": "lambda.amazonaws.com"
-       }
-      }
-     ]
-    },
-    "ManagedPolicyArns": [
-     {
-      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-     }
-    ]
-   },
-   "Metadata": {
-    "aws:cdk:path": "MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
-   }
-  },
-  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
-   "Type": "AWS::Lambda::Function",
-   "Properties": {
-    "Code": {
-     "S3Bucket": {
-      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
-     },
-     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
-    },
-    "Timeout": 900,
-    "MemorySize": 128,
-    "Handler": "index.handler",
-    "Role": {
-     "Fn::GetAtt": [
-      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-      "Arn"
-     ]
-    },
-    "Runtime": "nodejs22.x",
-    "Description": {
-     "Fn::Join": [
-      "",
-      [
-       "Lambda function for auto-deleting objects in ",
-       {
-        "Ref": "SiteBucket397A1860"
-       },
-       " S3 bucket."
-      ]
-     ]
-    }
-   },
-   "DependsOn": [
-    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
-   ],
-   "Metadata": {
-    "aws:cdk:path": "MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
-    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
-    "aws:asset:property": "Code"
-   }
-  },
   "OAIE1EFC67F": {
    "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
    "Properties": {
@@ -576,7 +726,7 @@
      }
     ],
     "SourceObjectKeys": [
-     "791d4c9883052272f404948aaae5e50699fabc6d689a044ac8f3aaeb758175fa.zip"
+     "49095e0941d6be56e144abdf9513fb005fc9b9683e1609d627cceac923d06743.zip"
     ],
     "DestinationBucketName": {
      "Ref": "SiteBucket397A1860"
@@ -779,7 +929,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/5VSTWsbMRD9LfVZVss2vfS2sQkJFGwc6CUUI2sny9haadGM7Bqx/736cFyn9JLTvBk9PY3mTSObu0Z++aRONNfdYW5wJ+MzK30QqbSNRg27Tsn4EKxmdFYsXu0tXoMfkOiS/VBn8D/Bl/wZbW+A3ZU/CVSDjBtnIJNLXDuD+lyUCpoEfd1GRQRMss1BdDAadx7AsrwP+gC8vBYyW8ZavVcEosIsV9FLnA34G+3s++z2h/lr6WY5ootqG9gtITUMq90eNNNs+nXR+9vkbf4B7XohjZUht52lJ6FG7FPhpM7HRsZH5rEdMT+SQ04Tvy+TqiCXNi5wRU+WoffqzYd/0sKbhDYudK/epdHFlccebas1ED11qQvk8qVF5jxkzn8ZSyT2uAtvyrf5NIliUe4vmS0WgdgNGyAXvK4eX/G7o7V3R+zAF8/qim1N3p1tmp42KNsTLQyWdcoyq8BjSG5b14Hc0+djcye/pa3dE+Lch9TpAHJT4x9wicvl0gIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/6VTTU/DMAz9LeycBdTBhVvZhJiEtGlIXBCastRU3tKkipONKep/J2m2MT4uiJOf7Wfn2VYKXlwX/OpC7Ggoq81Q4YqHJyfkhsXQMtCIhzsvN+DY+E1n9BIGDb6jHtwOzssSP9L7FPFMLb0zE1DgYLZag3Q06Ni/ql9ZTs2NQrn/1JT9PyjLBXFSBw3oPwr7WXzUdScIOqZEs6oED/deS4dGJ53neA62QaKD9yj2YJ/B9v4T6jpObE78jqFoeFgYBYnc28/pM+oYjZZBEIEjXibDKmiV2Sd1B82TU6BjosU6at+J/bbg4cG5tmwxtUsmuXG0un8ugxRaGO8ymmoHtRXHYb65Pa9jUhlfvVkT3w8zizXqUkogmlZRAbpe/Dhx7hPnV8YEyVlc+WPnc7/r2NiTM80CyHgr825O+Etqbs0WK7DpNqzfTpoq7vlwp6VKB1jGQ0uFvNzRWGF/k9Rz5l3r48q0qYCv6XJbXPOb+GHWhDi0PiptgC+y/QDIes/0TQMAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "MicroDramaPitcherStack/CDKMetadata/Default"

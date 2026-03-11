@@ -39,6 +39,30 @@
       "data": "CheckBootstrapVersion"
     }
   ],
+  "/MicroDramaPitcherStack/VideoBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VideoBucket6ED8E1AF"
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketAutoDeleteObjects"
+      }
+    }
+  ],
+  "/MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+    }
+  ],
+  "/MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+    }
+  ],
   "/MicroDramaPitcherStack/GenerateHandler/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -63,18 +87,6 @@
       }
     }
   ],
-  "/MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
-    }
-  ],
-  "/MicroDramaPitcherStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
-    }
-  ],
   "/MicroDramaPitcherStack/OAI/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -97,6 +109,24 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "CDKMetadata"
+    }
+  ],
+  "/MicroDramaPitcherStack/VideoBucket/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VideoBucketPolicyDE50723C"
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketPolicyStatements"
+      }
+    }
+  ],
+  "/MicroDramaPitcherStack/VideoBucket/AutoDeleteObjectsCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VideoBucketAutoDeleteObjectsCustomResource5F365B42"
     }
   ],
   "/MicroDramaPitcherStack/GenerateHandler/ServiceRole/Resource": [

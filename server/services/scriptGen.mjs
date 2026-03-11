@@ -29,7 +29,7 @@ export async function generateScript(idea) {
   };
 
   const command = new InvokeModelCommand({
-    modelId: "amazon.nova-lite-v1:0",
+    modelId: "us.amazon.nova-lite-v1:0",
     contentType: "application/json",
     accept: "application/json",
     body: JSON.stringify(payload),

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const API = "/api/generate";
+const API = "https://d41jrpg1x3.execute-api.us-west-2.amazonaws.com/api/generate";
 
 const styles = {
   app: { fontFamily: "'Segoe UI', sans-serif", background: "#0d0d0d", color: "#eee", minHeight: "100vh", padding: "2rem" },
@@ -73,7 +73,7 @@ export default function App() {
 
       <label style={styles.checkbox}>
         <input type="checkbox" checked={withVideo} onChange={(e) => setWithVideo(e.target.checked)} />
-        Also generate video (Twelve Labs)
+        Also generate video (Luma Ray v2 — takes a few minutes)
       </label>
 
       {loading && <div style={styles.spinner}>✨ Crafting your micro drama pitch...</div>}
