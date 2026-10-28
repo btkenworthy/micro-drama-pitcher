@@ -23,12 +23,15 @@ class MicroDramaPitcherStack extends Stack {
      cors: [{ allowedMethods: [s3.HttpMethods.GET], allowedOrigins: ["*"], allowedHeaders: ["*"] }],
    });
 
+   // Nova Reel requires a bucket in us-east-1; use a deterministic name
+   const videoBucketEast = `micro-drama-video-${this.account}-us-east-1`;
+
    const fn = new lambda.Function(this, "GenerateHandler", {
-     runtime: lambda.Runtime.NODEJS_20_X,
+     runtime: lambda.Runtime.NODEJS_22_X,
      handler: "lambda.handler",
      code: lambda.Code.fromAsset(path.join(__dirname, "../server"), {
        bundling: {
-         image: lambda.Runtime.NODEJS_20_X.bundlingImage,
+         image: lambda.Runtime.NODEJS_22_X.bundlingImage,
          command: ["bash", "-c", "npm ci --omit=dev && cp -r . /asset-output"],
          local: {
            tryBundle(outputDir) {
@@ -43,6 +46,7 @@ class MicroDramaPitcherStack extends Stack {
      memorySize: 512,
      environment: {
        S3_VIDEO_BUCKET: videoBucket.bucketName,
+       S3_VIDEO_BUCKET_EAST: videoBucketEast,
      },
    });
 
@@ -51,6 +55,15 @@ class MicroDramaPitcherStack extends Stack {
      resources: ["*"],
    }));
    videoBucket.grantReadWrite(fn);
+
+   // Grant Lambda access to the us-east-1 video bucket
+   fn.addToRolePolicy(new iam.PolicyStatement({
+     actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+     resources: [
+       `arn:aws:s3:::${videoBucketEast}`,
+       `arn:aws:s3:::${videoBucketEast}/*`,
+     ],
+   }));
 
    const api = new HttpApi(this, "Api", { corsPreflight: { allowOrigins: ["*"], allowMethods: [HttpMethod.POST, HttpMethod.OPTIONS], allowHeaders: ["Content-Type"] } });
    const integration = new HttpLambdaIntegration("LambdaIntegration", fn);
