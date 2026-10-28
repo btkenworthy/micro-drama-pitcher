@@ -6,35 +6,31 @@ const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us
 const s3 = new S3Client({ region: process.env.AWS_REGION || "us-west-2" });
 
 export async function generateImage(prompt, s3Bucket) {
- const payload = {
-   prompt: `Cinematic still, film scene: ${prompt}`,
-   mode: "text-to-image",
-   aspect_ratio: "16:9",
-   output_format: "png",
- };
+  const command = new InvokeModelCommand({
+    modelId: "stability.sd3-5-large-v1:0",
+    contentType: "application/json",
+    accept: "application/json",
+    body: JSON.stringify({
+      prompt: `Cinematic still frame from a film, consistent cinematic color grading, anamorphic lens: ${prompt}`,
+      mode: "text-to-image",
+      aspect_ratio: "16:9",
+      output_format: "png",
+    }),
+  });
 
- const command = new InvokeModelCommand({
-   modelId: "stability.stable-image-ultra-v1:1",
-   contentType: "application/json",
-   accept: "application/json",
-   body: JSON.stringify(payload),
- });
+  const response = await bedrock.send(command);
+  const body = JSON.parse(new TextDecoder().decode(response.body));
+  const base64 = body.images?.[0];
+  if (!base64) return null;
 
- const response = await bedrock.send(command);
- const body = JSON.parse(new TextDecoder().decode(response.body));
- const base64 = body.images?.[0];
- if (!base64) return null;
-
- if (s3Bucket) {
-   const key = `images/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
-   await s3.send(new PutObjectCommand({
-     Bucket: s3Bucket,
-     Key: key,
-     Body: Buffer.from(base64, "base64"),
-     ContentType: "image/png",
-   }));
-   return await getSignedUrl(s3, new GetObjectCommand({ Bucket: s3Bucket, Key: key }), { expiresIn: 3600 });
- }
-
- return `data:image/png;base64,${base64}`;
+  if (s3Bucket) {
+    const key = `images/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
+    await s3.send(new PutObjectCommand({
+      Bucket: s3Bucket, Key: key,
+      Body: Buffer.from(base64, "base64"), ContentType: "image/png",
+    }));
+    const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket: s3Bucket, Key: key }), { expiresIn: 3600 });
+    return { url, s3Key: key };
+  }
+  return { url: `data:image/png;base64,${base64}`, s3Key: null };
 }
