@@ -1,0 +1,11 @@
+{
+  "CORSRules": [
+    {
+      "ID": "export-video-download",
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedOrigins": ["https://d2ar2bjd3rjebg.cloudfront.net"],
+      "ExposeHeaders": ["Content-Length", "Content-Type"],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
