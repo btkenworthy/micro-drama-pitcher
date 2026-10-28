@@ -1,3 +1,18 @@
 node_modules/
 .env
 dist/
+
+# CDK synth output (infra/cdk.out, infra/cdk.out.uswest2, etc.)
+infra/cdk.out/
+infra/cdk.out*/
+
+# Stray root-level CDK synth leftovers
+/MicroDramaPitcherStack.*.json
+
+# OS / editor / agent local files
+.DS_Store
+.agents/
+.vscode/
+
+# Unrelated third-party report kept locally
+The-DPP-Tech-Trends-2026.pdf
